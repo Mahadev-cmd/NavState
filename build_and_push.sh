@@ -1,32 +1,56 @@
 #!/bin/bash
-set -e  # Exit if any command fails
+set -e  # Exit immediately if a command fails
+set -o pipefail
 
+# ==== CONFIGURATION ====
+GITHUB_REPO="https://github.com/Mahadev-cmd/NavState.git"
 IMAGE_NAME="mahadev1632/navstate"
 
-# Make sure we are in Jenkins workspace
-cd "$WORKSPACE" || { echo "Workspace not found"; exit 1; }
-
-# Authenticate to Docker Hub once
+# ==== DOCKER LOGIN ====
+if [[ -z "$DOCKER_HUB_USERNAME" || -z "$DOCKER_HUB_PASSWORD" ]]; then
+    echo "❌ ERROR: Docker Hub credentials not set in environment variables."
+    exit 1
+fi
+echo "🔐 Logging in to Docker Hub..."
 echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
 
-# Fetch all tags from remote
-git fetch --tags
+# ==== FETCH LATEST TAGS ====
+echo "📥 Fetching tags from remote..."
+git fetch --tags --force
 
-# Loop through tags that match pattern v1.0, v1.1, etc.
-for TAG in $(git tag -l 'v[0-9]*.[0-9]*'); do
-    echo "=== Processing tag: $TAG ==="
+# Get all tags matching vX.Y format
+TAGS=$(git tag -l 'v[0-9]*.[0-9]*')
 
-    # Checkout tag
+if [[ -z "$TAGS" ]]; then
+    echo "❌ No matching tags found in the repository."
+    exit 1
+fi
+
+# ==== PROCESS EACH TAG ====
+for TAG in $TAGS; do
+    echo "========================================"
+    echo "🏷  Processing tag: $TAG"
+    echo "========================================"
+
+    # Ensure clean working directory before checkout
+    git reset --hard
+    git clean -fd
+
+    # Checkout the tag
     git checkout "$TAG"
 
-    # Build Docker image for this tag
+    # Build Docker image
+    echo "🐳 Building Docker image $IMAGE_NAME:$TAG..."
     docker build -t "$IMAGE_NAME:$TAG" .
 
-    # Push image to Docker Hub
+    # Push Docker image
+    echo "📤 Pushing Docker image to Docker Hub..."
     docker push "$IMAGE_NAME:$TAG"
 
-    echo "=== Finished pushing $IMAGE_NAME:$TAG ==="
+    echo "✅ Finished processing tag: $TAG"
+    echo
 done
 
-# Go back to main branch (optional)
+# Return to main branch for safety
 git checkout main
+echo "🎉 All tags built and pushed successfully."
