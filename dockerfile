@@ -30,6 +30,7 @@ WORKDIR /workspace
 # Copy your script into container
 COPY video4.py .
 
+COPY yolov10s.pt .
 # Set environment (optional)
 ENV RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 
