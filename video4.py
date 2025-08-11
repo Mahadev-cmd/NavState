@@ -229,7 +229,7 @@ def main_loop():
                 cv2.putText(writable_frame, label_text, (label_x, label_y),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
         
-        cv2.polylines(writable_frame, [ZONE_PTS], isClosed=True, color=(255, 255, 0), thickness=2)
+        # cv2.polylines(writable_frame, [ZONE_PTS], isClosed=True, color=(255, 255, 0), thickness=2)
         
         frame_to_show = ann.result()
         frame_to_show_bgr = cv2.cvtColor(frame_to_show, cv2.COLOR_RGB2BGR)
