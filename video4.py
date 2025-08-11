@@ -13,7 +13,7 @@ ZONE_BOT_PERC     = 0.60
 H_REAL = {'person': 1.7, 'car': 1.5, 'bus': 3.0, 'truck': 3.2, 'Unknown': 1.5}
 a = 0.7
 # Resize frame before showing
-scale = 1.0  # Increase this scale for larger size
+scale = 1.5  # Increase this scale for larger size
 
 # ─── ArgParse ─────────────────────────────────────────────────────────────────
 parser = argparse.ArgumentParser()
